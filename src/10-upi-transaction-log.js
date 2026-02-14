@@ -48,4 +48,80 @@
  */
 export function analyzeUPITransactions(transactions) {
   // Your code here
+  if (!Array.isArray(transactions) || transactions.length === 0) {
+    return null
+  }
+
+  const validTransactions = transactions.filter(t =>
+    typeof t.amount === "number" &&
+    t.amount > 0 &&
+    (t.type === "credit" || t.type === "debit")
+  )
+
+  if (validTransactions.length === 0) return null
+
+  let totalCredit = 0
+  let totalDebit = 0
+  let highestTransaction = validTransactions[0]
+
+  const categoryBreakdown = {}
+  const contactCount = {}
+
+
+  validTransactions.forEach(t => {
+
+    
+    if (t.type === "credit") {
+      totalCredit += t.amount
+    } else {
+      totalDebit += t.amount
+    }
+
+
+    if (t.amount > highestTransaction.amount) {
+      highestTransaction = t
+    }
+
+
+    categoryBreakdown[t.category] =
+      (categoryBreakdown[t.category] || 0) + t.amount
+
+    
+    contactCount[t.to] =
+      (contactCount[t.to] || 0) + 1
+  })
+
+  
+  const transactionCount = validTransactions.length
+  const totalAmount = totalCredit + totalDebit
+  const avgTransaction = Math.round(totalAmount / transactionCount)
+  const netBalance = totalCredit - totalDebit
+
+  const allAbove100 = validTransactions.every(t => t.amount > 100)
+  const hasLargeTransaction = validTransactions.some(t => t.amount >= 5000)
+
+
+  let frequentContact = ""
+  let maxCount = 0
+
+  for (let contact in contactCount) {
+    if (contactCount[contact] > maxCount) {
+      maxCount = contactCount[contact]
+      frequentContact = contact
+    }
+  }
+
+  return {totalCredit, totalDebit, netBalance, transactionCount, avgTransaction, highestTransaction, categoryBreakdown, frequentContact, allAbove100, hasLargeTransaction}
+
+  // totalCredit,
+  //   totalDebit,
+  //   netBalance,
+  //   transactionCount,
+  //   avgTransaction,
+  //   highestTransaction,
+  //   categoryBreakdown,
+  //   frequentContact,
+  //   allAbove100,
+  //   hasLargeTransaction
+
 }
